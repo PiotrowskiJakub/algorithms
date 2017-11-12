@@ -15,11 +15,11 @@ public:
 
     int val() { return value; }
 
-    void dec(const int &val) {
+    void subtract(const int &val) {
         this->value -= val;
     }
 
-    void inc(const int &val) {
+    void add(const int &val) {
         this->value += val;
     }
 };
@@ -28,8 +28,8 @@ class Edge {
 public:
     int from;
     int to;
-    int act = 0;
     int cap;
+    int act = 0;
 
     Edge(int from, int to, int cap) : from(from), to(to), cap(cap) {}
 
@@ -95,9 +95,9 @@ void printPath(int parent[], int start, int end) {
     cout << endl;
 }
 
-int minLeft(vector<vector<Int *>> &graph, int parent[], int s, int d) {
+int minLeft(vector<vector<Int *>> &graph, int parent[], int source, int sink) {
     int min = INT32_MAX;
-    for (auto i = d; i != s; i = parent[i]) {
+    for (auto i = sink; i != source; i = parent[i]) {
         int from = parent[i];
         if (graph[from][i]->val() < min) {
             min = graph[from][i]->val();
@@ -106,49 +106,51 @@ int minLeft(vector<vector<Int *>> &graph, int parent[], int s, int d) {
     return min;
 }
 
-bool bfs(vector<vector<Int *>> &graph, int s, int d, int parent[]) {
-    bool visited[graph.size()];
-    memset(visited, 0, graph.size() * sizeof(bool));
-    queue<int> q;
-    q.push(s);
-    parent[s] = -1;
-    while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-        for (auto v = 0; v < graph[u].size(); v++) {
-            if (graph[u][v] == NULL) {
+bool bfs(vector<vector<Int *>> &matrix, int source, int sink, int parent[]) {
+    bool visited[matrix.size()];
+    memset(visited, 0, matrix.size() * sizeof(bool));
+    queue<int> queue;
+    queue.push(source);
+    parent[source] = -1;
+    while (!queue.empty()) {
+        int vertex = queue.front();
+        queue.pop();
+        for (auto v = 0; v < matrix[vertex].size(); v++) {
+            if (matrix[vertex][v] == NULL) {
                 continue;
             }
-            if (!visited[v] && graph[u][v]->val() > 0) {
-                q.push(v);
-                parent[v] = u;
+            if (!visited[v] && matrix[vertex][v]->val() > 0) {
+                queue.push(v);
+                parent[v] = vertex;
                 visited[v] = true;
             }
         }
     }
-    return visited[d];
+    return visited[sink];
 }
 
-int algoMatrix(vector<vector<Int *>> &graph, int start, int end) {
-    int parent[graph.size()];
+void matrixVersion(vector<vector<Int *>> &matrix, int source, int sink) {
+    int parent[matrix.size()];
     int flow = 0;
-    while (bfs(graph, start, end, parent)) {
-        printPath(parent, start, end);
-        int min = minLeft(graph, parent, start, end);
+
+    while (bfs(matrix, source, sink, parent)) {
+        printPath(parent, source, sink);
+        int min = minLeft(matrix, parent, source, sink);
         if (min > 0) {
             flow += min;
-            for (auto i = end; i != start; i = parent[i]) {
+            for (auto i = sink; i != source; i = parent[i]) {
                 int from = parent[i];
-                graph[from][i]->dec(min);
-                if (graph[i][from] == NULL) {
-                    graph[i][from] = new Int(0);
+                matrix[from][i]->subtract(min);
+                if (matrix[i][from] == NULL) {
+                    matrix[i][from] = new Int(0);
                 }
-                graph[i][from]->inc(min);
+                matrix[i][from]->add(min);
             }
         }
 
     }
-    return flow;
+
+    cout << "Maximum flow: " << flow << endl;
 }
 
 
@@ -241,7 +243,7 @@ vector<Edge *> bfs(vector<Edge *> &edges, int s, int d, unsigned long size) {
     return path;
 }
 
-int algoEdges(vector<Edge *> &edges, int start, int end, unsigned long size) {
+void edgesVersion(vector<Edge *> &edges, int start, int end, unsigned long size) {
     vector<Edge *> path;
     int flow = 0;
     while ((path = bfs(edges, start, end, size)).size() > 0) {
@@ -256,18 +258,22 @@ int algoEdges(vector<Edge *> &edges, int start, int end, unsigned long size) {
             }
         }
     }
-    return flow;
+
+    cout << "Maximum flow: " << flow << endl;
 }
 
 int main(int argc, char *argv[]) {
-    int startPoint = stoi(string(argv[1]));
-    int endPoint = stoi(string(argv[2]));
+    int source = stoi(string(argv[1]));
+    int sink = stoi(string(argv[2]));
 
     vector<vector<Int *>> matrix = parseFile("graph.txt");
     vector<Edge *> edges = initEdges(matrix);
 
-    cout << "Flow: " << algoMatrix(matrix, startPoint, endPoint) << endl;
-    cout << "Flow: " << algoEdges(edges, startPoint, endPoint, matrix.size()) << endl;
+    cout << "\nMatrix:" << endl;
+    matrixVersion(matrix, source, sink);
+
+    cout << "\nEdges:" << endl;
+    edgesVersion(edges, source, sink, matrix.size());
 
     return 0;
 }
