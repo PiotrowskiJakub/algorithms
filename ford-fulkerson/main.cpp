@@ -83,13 +83,13 @@ vector<vector<Int *>> parseFile(string path) {
 // Matrix implementation
 
 void printPath(int parent[], int start, int end) {
-    vector<int> tmp;
+    vector<int> path;
     for (auto i = end; i != start; i = parent[i]) {
-        tmp.insert(tmp.begin(), i);
+        path.insert(path.begin(), i);
     }
-    tmp.insert(tmp.begin(), start);
+    path.insert(path.begin(), start);
     cout << "Path: ";
-    for (auto i : tmp) {
+    for (auto i : path) {
         cout << i << " ";
     }
     cout << endl;
@@ -113,15 +113,15 @@ bool bfs(vector<vector<Int *>> &matrix, int source, int sink, int parent[]) {
     queue.push(source);
     parent[source] = -1;
     while (!queue.empty()) {
-        int vertex = queue.front();
+        int node = queue.front();
         queue.pop();
-        for (auto v = 0; v < matrix[vertex].size(); v++) {
-            if (matrix[vertex][v] == NULL) {
+        for (auto v = 0; v < matrix[node].size(); v++) {
+            if (matrix[node][v] == NULL) {
                 continue;
             }
-            if (!visited[v] && matrix[vertex][v]->val() > 0) {
+            if (!visited[v] && matrix[node][v]->val() > 0) {
                 queue.push(v);
-                parent[v] = vertex;
+                parent[v] = node;
                 visited[v] = true;
             }
         }
