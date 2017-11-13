@@ -180,28 +180,27 @@ vector<Edge *> initEdges(const vector<vector<Int *>> &matrix) {
     return edges;
 }
 
-//Two edges are called incident, if they share a vertex.
-vector<Edge *> incidentEdges(vector<Edge *> &edges, int v) {
-    vector<Edge *> ret;
+//Two edges are called incident, if they share a node
+vector<Edge *> incidentEdges(vector<Edge *> &edges, int node) {
+    vector<Edge *> incidentEdges;
     for (auto &e : edges) {
-        if (e->from == v) {
-            ret.push_back(e);
+        if (e->from == node) {
+            incidentEdges.push_back(e);
         }
     }
 
-    return ret;
+    return incidentEdges;
 }
 
-Edge *getOrAddEdge(vector<Edge *> &edges, int fro, int to, int cap = 0) {
-    Edge *tmp = NULL;
+Edge *getOrAddEdge(vector<Edge *> &edges, int from, int to, int cap = 0) {
     for (auto e : edges) {
-        if (e->from == fro && e->to == to) {
+        if (e->from == from && e->to == to) {
             return e;
         }
     }
-    tmp = new Edge{fro, to, cap};
-    tmp->act = cap;
-    return tmp;
+    Edge *edge = new Edge{from, to, cap};
+    edge->act = cap;
+    return edge;
 }
 
 int minLeft(vector<Edge *> &path) {
@@ -214,27 +213,27 @@ int minLeft(vector<Edge *> &path) {
     return min;
 }
 
-vector<Edge *> bfs(vector<Edge *> &edges, int s, int d, unsigned long size) {
+vector<Edge *> bfs(vector<Edge *> &edges, int source, int sink, unsigned long size) {
     bool visited[size];
-    memset(visited, 0, size * sizeof(int));
-    queue<int> q;
-    q.push(s);
+    memset(visited, 0, size * sizeof(bool));
+    queue<int> queue;
+    queue.push(source);
     Edge *parent[size];
     memset(parent, 0, size * sizeof(Edge *));
-    while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-        for (auto e : incidentEdges(edges, u)) {
+    while (!queue.empty()) {
+        int node = queue.front();
+        queue.pop();
+        for (auto e : incidentEdges(edges, node)) {
             if (!visited[e->to] && e->left() > 0) {
-                q.push(e->to);
+                queue.push(e->to);
                 parent[e->to] = e;
                 visited[e->to] = true;
             }
         }
     }
     vector<Edge *> path;
-    if (visited[d]) {
-        Edge *e = parent[d];
+    if (visited[sink]) {
+        Edge *e = parent[sink];
         while (e != NULL) {
             path.insert(path.begin(), e);
             e = parent[e->from];
@@ -243,10 +242,10 @@ vector<Edge *> bfs(vector<Edge *> &edges, int s, int d, unsigned long size) {
     return path;
 }
 
-void edgesVersion(vector<Edge *> &edges, int start, int end, unsigned long size) {
+void edgesVersion(vector<Edge *> &edges, int source, int sink, unsigned long size) {
     vector<Edge *> path;
     int flow = 0;
-    while ((path = bfs(edges, start, end, size)).size() > 0) {
+    while ((path = bfs(edges, source, sink, size)).size() > 0) {
         printPath(path);
         int min = minLeft(path);
         if (min > 0) {
