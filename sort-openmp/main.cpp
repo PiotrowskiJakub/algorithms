@@ -5,7 +5,7 @@
 #include <cstring>
 #include <sys/time.h>
 
-#define L 10000
+#define L 100000
 using namespace std;
 
 template<class T>
@@ -17,10 +17,11 @@ void swap(T *x, T *y) {
 
 template<class T>
 void print(T *start, T *end) {
-    if (*end > 100) {
-        *end = 100;
-    }
-    for (T *x = start; x != end; x++) {
+    int count = 0;
+    for (T *x = start; x != end; x++, count++) {
+        if (count == 100) {
+            break;
+        }
         cout << *x << " ";
     }
     cout << endl;
