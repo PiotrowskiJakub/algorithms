@@ -33,6 +33,9 @@
 # CMake
 cmake-build-debug/
 
+# MacOS
+.DS_Store
+
 ## File-based project format:
 *.iws
 
